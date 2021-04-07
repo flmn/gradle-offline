@@ -1,0 +1,49 @@
+plugins {
+    id 'org.springframework.boot' version '2.4.4'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
+
+group = 'tech.jitao'
+version = '0.0.1'
+sourceCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    if (gradle.startParameter.isOffline()) {
+        implementation fileTree(dir: "$projectDir/libs/implementation")
+        testImplementation fileTree(dir: "$projectDir/libs/testImplementation")
+    } else {
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task deleteLibs(type: Delete) {
+    delete "$projectDir/libs/implementation"
+    delete "$projectDir/libs/testImplementation"
+}
+
+task copyToLibs(dependsOn: 'deleteLibs') {
+    doLast {
+        configurations.implementation.canBeResolved = true
+        copy {
+            from configurations.implementation.files
+            into "$projectDir/libs/implementation"
+        }
+
+
+        configurations.testImplementation.canBeResolved = true
+        copy {
+            from configurations.testImplementation.files
+            into "$projectDir/libs/testImplementation"
+        }
+    }
+}
